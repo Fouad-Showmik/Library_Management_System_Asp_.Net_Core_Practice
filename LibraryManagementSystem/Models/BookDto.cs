@@ -1,15 +1,11 @@
-﻿namespace LibraryManagementSystem.Models.Entities
+﻿namespace LibraryManagementSystem.Models
 {
-    //1 book --> 1 Author and 1 book ---> 1 Category
-    public class Book
-    {
-        public int Id { get; set; }
+    public class BookDto
+    {  
         public required string Title { get; set; }
         public required string ISBN { get; set; }
         public int AuthorId { get; set; }
-        public Author? Author { get; set; }
         public int CategoryId { get; set; }
-        public Category? Category {  get; set; }
         public required int TotalCopies { get; set; }
         public required int AvailableCopies { get; set; }
     }
