@@ -1,4 +1,5 @@
 ﻿using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Manager.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,90 +12,57 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
-        private readonly ApplicationDbContext dbcontext;
+        private readonly IAuthorManager _authorManager;
 
-        public AuthorController(ApplicationDbContext dbcontext)
+        public AuthorController(IAuthorManager context)
         {
-            this.dbcontext = dbcontext;
+            _authorManager = context;
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> GetAuthor()
+        public async Task<IActionResult> GetAll()
         {
-            var res = await dbcontext.Authors.Include(a => a.Books).
-                ToListAsync();
-            return Ok(res);
+            var authors = await _authorManager.GetAllAsync();
+            return Ok(authors);
         }
 
         [HttpGet]
         [Route("{id:int}")]
-
-        public async Task<IActionResult> GetAuthorByID(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var res = await dbcontext.Authors.FindAsync(id);
-            if(res is null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(res);
-            }
+            var author = await _authorManager.GetByIdAsync(id);
+            return Ok(author);
         }
 
         [HttpPost]
 
-        public async Task<IActionResult> CreateAuthor(AuthorDto author)
+        public async Task<IActionResult> Create(AuthorDto dto)
         {
-
-            var authorCreate = new Author()
-            {
-                Bio = author.Bio,
-                Name = author.Name,
-            };
-
-            dbcontext.Authors.Add(authorCreate);
-            dbcontext.SaveChanges();
-            return Ok(authorCreate);
+            var auhtors = await _authorManager.CreateAsync(dto);
+            return Ok(auhtors);
 
         }
+
 
         [HttpPut]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> UpdateAuthor(int id, AuthorDto author)
+        public async Task<IActionResult> Update(int id, AuthorDto dto)
         {
-            var res = await dbcontext.Authors.FindAsync(id);
-            if(res is null)
-            {
-                return NotFound();
-            }
-
-            res.Name = author.Name;
-            res.Bio = author.Bio;
-            dbcontext.SaveChanges();
-            return Ok(res);
+            var authors = await _authorManager.UpdateAsync(id, dto);
+            if (authors is null) return NotFound();
+            return Ok(authors);
         }
 
         [HttpDelete]
         [Route("{id:int}")]
-
-        public async Task<IActionResult> DeleteAuthor(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var res = await dbcontext.Authors.FindAsync(id);
-
-            if(res is null)
-            {
-                return NotFound();
-            }
-
-            dbcontext.Authors.Remove(res);
-            dbcontext.SaveChanges();
-            return Ok($"{res.Name} deleted successfully.");
+            var auhtor = await _authorManager.DeleteAsync(id);
+            if (auhtor is null) return NotFound();
+            return Ok(auhtor);
         }
+
     }
-    
-
-
 }

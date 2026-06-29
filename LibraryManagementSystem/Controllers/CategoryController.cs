@@ -1,4 +1,5 @@
 ﻿using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Managers.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,71 +12,53 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly ICategoryManager _categoryManager;
 
-        public CategoryController(ApplicationDbContext dbContext)
+        public CategoryController(ICategoryManager categoryManager)
         {
-            this.dbContext = dbContext;
+            _categoryManager = categoryManager;
         }
 
         [HttpGet]
-
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<IActionResult> GetAll()
         {
-            var res = await dbContext.Categories.ToListAsync();
-            return Ok(res);
+            var category = await _categoryManager.GetAllCategory();
+            return Ok(category);
+        }
+
+        [HttpGet]
+        [Route("{id:int}")]
+
+        public async Task<IActionResult> GetById(int id)
+        {
+            var author = await _categoryManager.GetCategoryById(id);
+            return Ok(author);
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> CreateCategoryAsync(CategoryDto category)
+        public async Task<IActionResult> Create(CategoryDto dto)
         {
-            var addCategory = new Category()
-            {
-                Name = category.Name,
-            };
-
-            await dbContext.Categories.AddAsync(addCategory);
-            dbContext.SaveChanges();
-            return Ok(addCategory);
+            var author = await _categoryManager.CreateCategory(dto);
+            return Ok(author);
         }
 
-        [HttpPatch]
-        [Route("{id:int}")]
+        [HttpPut]
 
-        public async Task<IActionResult> UpdateCategory(int id, CategoryDto category)
+        public async Task<IActionResult> Update(int id, CategoryDto dto)
         {
-            var res = await dbContext.Categories.FindAsync(id);
-            if (res is null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                res.Name = category.Name;
-            }
-
-            dbContext.SaveChanges();
-            return Ok(res);
+            var author = await _categoryManager.UpdateCategory(id, dto);
+            if (author is null) return NotFound();
+            return Ok(author);
         }
 
         [HttpDelete]
-        [Route("{id:int}")]
 
-        public async Task<IActionResult> DeleteCategory(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var res = await dbContext.Categories.FindAsync(id);
+            var author = await _categoryManager.DeleteCategory(id);
+            if (author is null) return NotFound();
+            return Ok(author);
 
-            if(res is not null)
-            {
-                dbContext.Categories.Remove(res);
-                dbContext.SaveChanges();
-                return Ok($"{res.Name} deleted successfully.");
-            }
-            else
-            {
-                return NotFound();
-            }
         }
 
     }

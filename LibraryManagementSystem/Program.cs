@@ -1,4 +1,11 @@
 using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Extensions;
+using LibraryManagementSystem.Manager;
+using LibraryManagementSystem.Manager.Interfaces;
+using LibraryManagementSystem.Managers;
+using LibraryManagementSystem.Managers.Interfaces;
+using LibraryManagementSystem.Repositories;
+using LibraryManagementSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +20,9 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddRepositories();
+builder.Services.AddManagers();
 
 var app = builder.Build();
 
