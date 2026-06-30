@@ -8,6 +8,9 @@ namespace LibraryManagementSystem.Extensions
         public static IServiceCollection AddRepositories(this IServiceCollection services) {
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<ICategoryRepository,CategoryRepository>();
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IMemberRepository, MemberRespository>();
+            services.AddScoped<IBorrowRecordRepository, BorrowRecordRepository>();
 
             return services;
         }

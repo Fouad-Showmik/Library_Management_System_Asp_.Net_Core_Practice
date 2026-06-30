@@ -1,4 +1,5 @@
 ﻿using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Managers.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,92 +12,58 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class MemberController : ControllerBase
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly IMemberManager _memberManager;
 
-        public MemberController(ApplicationDbContext dbContext)
+        public MemberController(IMemberManager memberManager)
         {
-            this.dbContext = dbContext;
+            _memberManager = memberManager;
         }
 
-        [HttpGet] 
+        [HttpGet]
 
-        public async Task<IActionResult> GetAllMembersAsync()
+        public async Task<IActionResult> Get()
         {
-            var res = await dbContext.Members.Include(a => a.BorrowRecords).ToListAsync();
-            return Ok(res);
+            var member = await _memberManager.GetAllMember();
+            return Ok(member);
         }
 
         [HttpGet]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> GetSingleMember(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var res = await dbContext.Members.FindAsync(id);
-                if (res is null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(res);
-            }
-
+            var member = await _memberManager.GetMemberById(id);
+            if (member is null) return NotFound();
+            return Ok(member);
         }
 
         [HttpPost]
-
-        public async Task<IActionResult> CreatMember(MemberDto dto)
+        public async Task<IActionResult> Create(MemberDto dto)
         {
-            var res = new Member()
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Phone = dto.Phone,
-            };
-
-            await dbContext.Members.AddAsync(res);
-            dbContext.SaveChanges();
-            return Ok(res);
+            var member = await _memberManager.CreateMember(dto);
+            return Ok(member);
         }
 
-
-        [HttpPatch]
+        [HttpPut]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> UpdateMember(int id, MemberDto dto)
+        public async Task<IActionResult> Update(int id, MemberDto dto)
         {
-            var res = await dbContext.Members.FindAsync(id);
-            if (res is null)
-            {
-                return NotFound();
-            }
-
-            res.FullName = dto.FullName;
-            res.Email = dto.Email;
-            res.Phone = dto.Phone;
-
-            dbContext.SaveChanges();
-            return Ok(res);
+            var member = await _memberManager.UpdateMember(id, dto);
+            if (member is null) return NotFound();
+            return Ok(member);
         }
 
         [HttpDelete]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> DeleteMember(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var res = await dbContext.Members.FindAsync(id);
-
-            if (res is null)
-            {
-                NotFound();
-            }
-
-            dbContext.Members.Remove(res);
-            dbContext.SaveChanges();
-            return Ok($"{res.FullName} deleted successfully.");
-
+            var member = await _memberManager.DeleteMember(id);
+            if (member is null) return NotFound();
+            return Ok(member);
         }
-    }
- }
+}
+}
 
 

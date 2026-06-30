@@ -1,4 +1,5 @@
 ﻿using LibraryManagementSystem.Data;
+using LibraryManagementSystem.Managers.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
 using Microsoft.AspNetCore.Http;
@@ -11,74 +12,55 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly IBookManager _bookManager;
 
-        public BookController(ApplicationDbContext dbContext)
+        public BookController(IBookManager bookManager)
         {
-            this.dbContext = dbContext;
+            _bookManager = bookManager;
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> GetAllBook()
+        public async Task<IActionResult> Get()
         {
-            var res = await dbContext.Books.ToListAsync();
-            return Ok(res);
+            var book = await _bookManager.GetAllBooks();
+            return Ok(book);
+        }
+
+        [HttpGet]
+        [Route("{id:int}")]
+
+        public async Task<IActionResult> GetById(int id)
+        {
+            var book = await _bookManager.GetBookById(id);
+            if(book is null) return NotFound();
+            return Ok(book);
         }
 
         [HttpPost]
 
-        public async Task<IActionResult> CreateBook(BookDto book)
+        public async Task<IActionResult> Create(BookDto dto)
         {
-            var newBook = new Book() { 
-                Title = book.Title,
-                ISBN = book.ISBN,
-                AuthorId = book.AuthorId,
-                CategoryId = book.CategoryId,
-                AvailableCopies = book.AvailableCopies,
-                TotalCopies = book.TotalCopies,
-            };
-
-            await dbContext.Books.AddAsync(newBook);
-            dbContext.SaveChanges();
-            return Ok();
+            var book = await _bookManager.CreateBook(dto);
+            return Ok(book);
         }
 
         [HttpPut]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> UpdateBookAsync(int id, BookDto book)
-        {
-            var res = await dbContext.Books.FindAsync(id);
-            if (res is null) return NotFound();
-            
-
-            res.Title = book.Title;
-            res.ISBN = book.ISBN;
-            res.AuthorId = book.AuthorId;
-            res.CategoryId = book.CategoryId;
-            res.AvailableCopies = book.AvailableCopies;
-            res.TotalCopies = book.TotalCopies;
-
-            await dbContext.SaveChangesAsync();
-            return Ok(res);
-
-
+        public async Task<IActionResult> Update(int id,BookDto dto) {
+            var book = await _bookManager.UpdateBook(id, dto);
+            if (book is null) return NotFound();
+            return Ok(book);
         }
 
         [HttpDelete]
         [Route("{id:int}")]
 
-        public IActionResult DeleteBook(int id)
-        {
-            var res = dbContext.Books.Find(id);
-            if(res is null)
-            {
-                return NotFound();
-            }
-            dbContext.Books.Remove(res);
-            dbContext.SaveChanges();
-            return Ok($"{res.Title} deleted successfully.");
+        public IActionResult Delete(int id) {
+        var book = _bookManager.DeleteBook(id);
+            if(book is null) return NotFound(); 
+            return Ok(book);
         }
     }
 }

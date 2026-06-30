@@ -11,6 +11,9 @@ namespace LibraryManagementSystem.Extensions
 
             services.AddScoped<IAuthorManager, AuthorManager>();
             services.AddScoped<ICategoryManager, CategoryManager>();
+            services.AddScoped<IBookManager, BookManager>();
+            services.AddScoped<IMemberManager, MemberManager>();
+            services.AddScoped<IBorrowRecordManager, BorrowRecordManager>();
 
             return services;
         }
