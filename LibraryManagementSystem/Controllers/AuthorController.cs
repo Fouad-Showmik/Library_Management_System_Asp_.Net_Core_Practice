@@ -1,7 +1,10 @@
-﻿using LibraryManagementSystem.Data;
+﻿using LibraryManagementSystem.CQRS.Authors.Commands;
+using LibraryManagementSystem.CQRS.Authors.Queries;
+using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Manager.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,18 +15,18 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class AuthorController : ControllerBase
     {
-        private readonly IAuthorManager _authorManager;
+        private readonly IMediator _mediator;
 
-        public AuthorController(IAuthorManager context)
+        public AuthorController(IMediator mediator)
         {
-            _authorManager = context;
+            _mediator = mediator;
         }
 
         [HttpGet]
 
         public async Task<IActionResult> GetAll()
         {
-            var authors = await _authorManager.GetAllAsync();
+            var authors = await _mediator.Send(new GetAllAuthorsQuery());
             return Ok(authors);
         }
 
@@ -31,15 +34,16 @@ namespace LibraryManagementSystem.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var author = await _authorManager.GetByIdAsync(id);
+            var author = await _mediator.Send(new GetAuthorByIdQuery(id));
+            if (author is null) return NotFound();
             return Ok(author);
         }
 
         [HttpPost]
 
-        public async Task<IActionResult> Create(AuthorDto dto)
+        public async Task<IActionResult> Create(CreateAuthorCommand command)
         {
-            var auhtors = await _authorManager.CreateAsync(dto);
+            var auhtors = await _mediator.Send(command);
             return Ok(auhtors);
 
         }
@@ -48,21 +52,21 @@ namespace LibraryManagementSystem.Controllers
         [HttpPut]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> Update(int id, AuthorDto dto)
+        public async Task<IActionResult> Update(int id, UpdateAuthorCommand command)
         {
-            var authors = await _authorManager.UpdateAsync(id, dto);
-            if (authors is null) return NotFound();
-            return Ok(authors);
+            command.Id = id;
+            var author = _mediator.Send(command);
+            if (author is null) return NotFound();
+            return Ok(author);
         }
 
         [HttpDelete]
         [Route("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var auhtor = await _authorManager.DeleteAsync(id);
-            if (auhtor is null) return NotFound();
-            return Ok(auhtor);
+            var author = await _mediator.Send(new DeleteAuthorCommand(id));
+            if (author is null) return NotFound();
+            return Ok($"{author.Name} deleted successfully.");
         }
-
     }
 }
