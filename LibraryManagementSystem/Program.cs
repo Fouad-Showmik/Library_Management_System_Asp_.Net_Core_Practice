@@ -1,9 +1,5 @@
 using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Extensions;
-using LibraryManagementSystem.Manager;
-using LibraryManagementSystem.Manager.Interfaces;
-using LibraryManagementSystem.Managers;
-using LibraryManagementSystem.Managers.Interfaces;
 using LibraryManagementSystem.Repositories;
 using LibraryManagementSystem.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +18,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddRepositories();
-builder.Services.AddManagers();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 var app = builder.Build();

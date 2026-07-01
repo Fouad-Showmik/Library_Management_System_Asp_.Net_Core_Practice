@@ -32,15 +32,11 @@ namespace LibraryManagementSystem.Repositories
             return category;
         }
 
-        public async Task<Category?> UpdateCategory(int id, Category category)
+        public async Task<Category?> UpdateCategory(Category category)
         {
-            var existing = await _context.Categories.FindAsync(id);
-            if (existing is null) return null;
-
-            existing.Name = category.Name;
-
+            _context.Categories.Update(category);
             await _context.SaveChangesAsync();
-            return existing;
+            return category;
         }
 
         public async Task<Category?> DeleteCategory(int id)

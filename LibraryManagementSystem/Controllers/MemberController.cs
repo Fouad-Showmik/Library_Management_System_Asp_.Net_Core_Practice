@@ -1,7 +1,9 @@
-﻿using LibraryManagementSystem.Data;
-using LibraryManagementSystem.Managers.Interfaces;
+﻿using LibraryManagementSystem.CQRS.Members.Commands;
+using LibraryManagementSystem.CQRS.Members.Queries;
+using LibraryManagementSystem.Data;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,18 +14,18 @@ namespace LibraryManagementSystem.Controllers
     [ApiController]
     public class MemberController : ControllerBase
     {
-        private readonly IMemberManager _memberManager;
+        private readonly IMediator _mediator;
 
-        public MemberController(IMemberManager memberManager)
+        public MemberController(IMediator mediator)
         {
-            _memberManager = memberManager;
+            _mediator = mediator;
         }
 
         [HttpGet]
 
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetAll()
         {
-            var member = await _memberManager.GetAllMember();
+            var member = await _mediator.Send(new GetAllMemberQuery());
             return Ok(member);
         }
 
@@ -32,24 +34,25 @@ namespace LibraryManagementSystem.Controllers
 
         public async Task<IActionResult> GetById(int id)
         {
-            var member = await _memberManager.GetMemberById(id);
+            var member = await _mediator.Send(new GetMemberByIdQuery(id));
             if (member is null) return NotFound();
             return Ok(member);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(MemberDto dto)
+        public async Task<IActionResult> Create(CreateMemberCommand command)
         {
-            var member = await _memberManager.CreateMember(dto);
+            var member = await _mediator.Send(command);
             return Ok(member);
         }
 
         [HttpPut]
         [Route("{id:int}")]
 
-        public async Task<IActionResult> Update(int id, MemberDto dto)
+        public async Task<IActionResult> Update(int id, UpdateMemberCommand command)
         {
-            var member = await _memberManager.UpdateMember(id, dto);
+            command.Id = id;
+            var member = await _mediator.Send(command);
             if (member is null) return NotFound();
             return Ok(member);
         }
@@ -59,11 +62,12 @@ namespace LibraryManagementSystem.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var member = await _memberManager.DeleteMember(id);
+            var member = await _mediator.Send(new DeleteMemberCommand(id));
             if (member is null) return NotFound();
             return Ok(member);
         }
+    }
 }
-}
+
 
 

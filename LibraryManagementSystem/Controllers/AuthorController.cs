@@ -1,7 +1,6 @@
 ﻿using LibraryManagementSystem.CQRS.Authors.Commands;
 using LibraryManagementSystem.CQRS.Authors.Queries;
 using LibraryManagementSystem.Data;
-using LibraryManagementSystem.Manager.Interfaces;
 using LibraryManagementSystem.Models;
 using LibraryManagementSystem.Models.Entities;
 using MediatR;
